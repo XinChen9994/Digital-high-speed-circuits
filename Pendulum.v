@@ -1,23 +1,4 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2022/07/31 22:58:26
-// Design Name: 
-// Module Name: Pendulum
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
+
 
 
 module Pendulum(
@@ -64,8 +45,7 @@ module Pendulum(
     //  Position <= 0;
       Last_P <= 0;
       end
-      else 
-       if (Position!=Last_P) begin
+      else if (Position!=Last_P) begin
       Direction <= Position - Last_P;
       Last_P <= Position;
       end
@@ -99,13 +79,13 @@ module Pendulum(
                  else */ 
                //   if (Position < 512 && Position >= 412 && !Direction[10]) begin   //if the position between -100 to 0 and dP is positive.
                 if (Position >= 512 && Position <= 612 && Direction[10]) begin   //if the position between 0 to 100 and dP is positive.
-                    Drive_R = 1;
+                    Drive_R = 0;
                     Load_R = 0;
                     Drive_Led_R = 1;
                     Load_Led_R = 0; 
                 end    
                 else begin   
-                    Drive_R = 0;
+                    Drive_R = 1;
                     Load_R = 0;
                     Drive_Led_R = 0;
                     Load_Led_R = 0;  
@@ -130,14 +110,14 @@ module Pendulum(
             Driving:begin
                if (Position < 512 && Position >= 412 && Direction[10]) begin   //if the position between -100 to 0 and dP is positive.
            //     if (Position >= 512 && Position <= 612 && !Direction[10]) begin   //if the position between 0 to 100 and dP is positive.
-                       Drive_R = 1;
+                       Drive_R = 0;
                        Load_R = 0;
                        Drive_Led_R = 1;
                        Load_Led_R = 0; 
                 end
                 
                 else begin   
-                     Drive_R = 0;
+                     Drive_R = 1;
                      Load_R = 0;
                      Drive_Led_R = 0;
                      Load_Led_R = 0;  

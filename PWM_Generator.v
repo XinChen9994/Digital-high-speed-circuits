@@ -1,23 +1,4 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2022/07/05 11:06:12
-// Design Name: 
-// Module Name: PWM_Generator
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
+
 
 
 module PWM_Generator(
@@ -29,7 +10,7 @@ input [9:0] Position,
 output reg pwm
     );
     
-  reg [9:0] counter;
+  reg [10:0] counter;
   reg [9:0] P;
   
     
@@ -41,17 +22,17 @@ output reg pwm
       end
     else if(counter < P) // if the counter less than postion, the pwm is high
         begin
-        counter <= counter + 1;
+        counter <= counter + 10'd1;
         pwm <= 1;
         end
-    else if(counter < 1023) //10 bit, 
+    else if(counter < 10'd1023) //10 bit, 
         begin
-        counter <= counter + 1;
-        pwm <= 0;
+        counter <= counter + 10'd1;
+        pwm <= 2'b0;
         end
     else   // reset the count
         begin
-        counter <= 0;
+        counter <= 10'd0;
         P <= Position;
         end
     

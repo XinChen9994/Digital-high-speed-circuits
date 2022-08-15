@@ -41,7 +41,7 @@ module Pendulum_tb(
     
     
     
-     EE_TOP  utt(
+     EE_TOP  uat(
      .reset(reset),
     .clk(clk),
     .PR(PR),
@@ -62,7 +62,7 @@ module Pendulum_tb(
     
         initial begin
         //    PR = 4'b1001; //PPR=600
-             PR = 4'b1111; //PPR=1024
+             PR = 4'b0000; //PPR=1024
             R=3'b000; // PMW rate  = 1ms
             reset = 1;#125 
             reset = 0;#125;
@@ -76,7 +76,7 @@ module Pendulum_tb(
         
         
         
-    
+  /*  
         // increaing test for encoder
                  initial begin
         A=0;
@@ -181,7 +181,7 @@ module Pendulum_tb(
             
             
              
-        end
+        end */
     /*
         initial begin
         B=0;
@@ -190,6 +190,18 @@ module Pendulum_tb(
         end  
         
 */
+
+		        initial begin
+        B=0;
+        #125000
+        forever #125000 B=~B;
+        end
+        
+        initial begin
+        A=0;
+        #185000
+        forever #125000 A=~A;
+        end
              initial begin
              PWM_Input = 1;
              #250000000

@@ -1,28 +1,8 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2022/06/27 13:45:42
-// Design Name: 
-// Module Name: encoder
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 
 module encoder(
 input reset,
-input CLK,
+input clk,
 input A,
 input B,
 input[9:0] PPR,
@@ -30,259 +10,263 @@ output signed [9:0] P
     );
     
     wire [10:0] PPR_1;// THE PPR+1
-    wire [10:0] Max;
-    wire [10:0] Min;
+    wire signed [10:0] Max;
+    wire signed [10:0] Min;
  
- // reg index;
-  reg signed [9:0] current_P = 0;
+  
+  
+  reg signed [9:0] current_P;
   reg signed [9:0] next_P;
   reg [4:0] current_state;
   reg [4:0] next_state;
-  wire signed [10:0] lim1;
+  wire signed  [10:0] lim1;
   wire signed [10:0] lim2;
-  reg neg;
-  reg pos;
+ // reg pos;
+  //reg neg;
   
    
-   parameter wait_state = 4'h0;
-   parameter inc_1= 4'h1;
-   parameter inc_2 = 4'h2;
-   parameter inc_3 = 4'h3;
-   parameter dec_1 = 4'h4;
-   parameter dec_2 = 4'h5;
-   parameter dec_3 = 4'h6;
-   parameter error = 4'h7;
+   parameter Error= 4'h0;
+   parameter S1= 4'h1;  // AB 00
+   parameter S2= 4'h2;  //AB  10
+   parameter S3 = 4'h3; // AB 11
+   parameter S4 = 4'h4; // AB 01
+
+   
    
     assign PPR_1 = PPR + 1;//  THE PPR+1 
     assign Max = (PPR_1/2)-1; 
     assign Min = ((-PPR_1)/2); 
-    assign lim1 = PPR_1/2; 
-    assign lim2 = ((-PPR_1)/2)-1; 
+  //  assign lim1 = PPR_1/2; 
+   // assign lim2 = ((-PPR_1)/2)-1; 
     
    // SET the index of encoder
    
 //  always@(posedge CLK or posedge index or posedge reset) begin 
 
-  always@(posedge CLK or posedge reset) begin 
+  always@(posedge clk or posedge reset) begin 
         if (reset)
             begin
-            //current_P <= 0;
-            current_state <= wait_state; 
+            current_P <= 0;
+            current_state <= Error; 
             end
-     /*   else if (index) 
-            begin
-         //   current_P <= 0;
-            current_state <= next_state;
-            end 
-            */
-        else   
-            begin 
-        //    current_P <= next_P;
-            current_state <= next_state;
-            end
-    end      
-    
+        else begin
+			   if( next_state == S1  && current_state == S4 )	
+					begin 
+					//	if(current_P < lim1 ) 
+					  if(current_P < Max ) 
+							begin 
+							  current_P <= current_P + 1'b1;
+							  
+							end
+						else 
+							begin
+							  current_P <= Min;
+							end	
+								
+				    end
+				else if (next_state == S4  && current_state == S1 )
+					begin
+					//	 if(current_P > lim2 ) 
+					     if(current_P > Min ) 
+							 begin 
+							  current_P <= current_P - 1'b1;
+						//	  neg_test <= 1;
+						     end
+						else 
+							 begin
+							   current_P <= Max;
+					//		   neg_test <= 0;
+						     end	
+					end	
+					
+				else 
+					begin
+				       current_P <= current_P;
+				
+				   end
+					 
+					 
+              current_state <= next_state;
+       
+          end
+	
+end	
+   
       
-  always@(*) begin   
-    next_state = current_state; 
-    next_P = current_P;  
-   // pos = 0;
-  //  neg = 0;
-  
+  always@(current_state or A or B) begin   
 
- 
-  if (current_P == lim1) begin
-  current_P = Min;
-  end
-
-  else if (current_P == lim2) begin
-  current_P = Max;
-  end
-  
-  else begin
-  
    case(current_state)
 
-     wait_state: 
+     Error: 
                 begin
-                
-                     pos = 0;
-                     neg = 0; 
-                    if (A==0 && B==0)
-                        begin
-                            next_state = wait_state;
-                        end
-                    else if (A==1 && B==0)
+				//   pos = 0;
+			//	   neg = 0;
+
+                     if (A==1 && B==0)
                             begin
-                                next_state = inc_1;
+                                next_state = S2 ;
+							
                             end        
                      else if (A==0 && B==1)
                              begin
-                                 next_state = dec_1;
-                             end              
+                                 next_state = S4 ;
+                             end
+                  else  if (A==0 && B==0)
+                        begin
+                            next_state = S1 ;
+                        end	
+                  else  if (A==1 && B==1)
+                        begin
+                            next_state = S3;
+                        end		
+						
                      else
-                        next_state =  error;                          
+                        next_state =  Error;                          
                 end
           
- 
-     inc_1: 
+		  
+		
+     S1: 
                            begin
+							   
                                if (A==0 && B==0)
                                    begin
-                                       next_state = wait_state;
+                                       next_state = S1;
                                    end
                                else if (A==1 && B==0)
                                        begin
-                                           next_state = inc_1;
+                                           next_state = S2;
+									//	   pos = 0;
+										   
                                        end        
-                                else if (A==1 && B==1)
+                                else if (A==0 && B==1)
                                         begin
-                                            next_state = inc_2;
+                                            next_state = S4;
+										//	next_P = next_P - 1'b1;
+									//		neg = 1;
                                         end              
                                 else
-                                   next_state =  error;                          
+                                   next_state =  Error;                          
                            end
                            
-     inc_2: 
+     S2: 
                                begin
                                   if (A==1 && B==0)
                                          begin
-                                             next_state = inc_1;
+                                             next_state = S2;
                                           end
                                   else if (A==1 && B==1)
                                           begin
-                                               next_state = inc_2;
+                                               next_state = S3;
                                            end        
-                                  else if (A==0 && B==1)
+                                  else if (A==0 && B==0)
                                            begin
-                                               next_state = inc_3;
+                                               next_state = S1;
                                             end              
                                   else
-                                     next_state =  error;                          
+                                     next_state =  Error;                          
                                 end                           
                               
-      inc_3: 
+      S3: 
                  begin
                             if (A== 1 && B==1)
                                  begin
-                                       next_state = inc_2;
+                                       next_state = S3;
                                   end
                             else if (A==0 && B==1)
                                      begin
-                                       next_state = inc_3;
+                                       next_state = S4;
                                      end        
-                            else if (A==0 && B==0)
+                            else if (A==1 && B==0)
                                       begin
-                                       next_state = wait_state;
-                                       current_P = current_P+1;
-                                     pos = 1;
+                                       next_state = S2;
+                                       
+                                    
                                       end              
                               else
-                                        next_state =  error;                          
-                        end                           
+                                        next_state =  Error;                          
+                        end              
+		
+
                                     
-       dec_1: 
-                                   begin
+       S4: 
+                                   begin   
+									  
                                               if (A==0 && B==0)
                                                    begin
-                                                         next_state = wait_state;
+                                                         next_state = S1;
+														 //next_P = next_P + 1'b1;
+													//	 pos = 1;
+														 
                                                     end
                                               else if (A==0 && B==1)
                                                        begin
-                                                         next_state = dec_1;
+                                                         next_state = S4;
                                                        end        
                                               else if (A==1 && B==1)
                                                         begin
-                                                         next_state = dec_2;
-                                                       
+                                                         next_state = S3;
+                                                        //   neg = 0;
                                                         end              
                                                 else
-                                                          next_state =  error;                          
+                                                          next_state =  Error;                          
                                           end                                                  
                                     
-      dec_2: 
-                                                     begin
-                                                                if (A==1 && B==1)
-                                                                     begin
-                                                                           next_state = dec_2;
-                                                                      end
-                                                                else if (A==0 && B==1)
-                                                                         begin
-                                                                           next_state = dec_1;
-                                                                         end        
-                                                                else if (A==1 && B==0)
-                                                                          begin
-                                                                           next_state = dec_3;
-                                                                   
-                                                                          end              
-                                                                  else
-                                                                            next_state =  error;                          
-                                                            end               
-                                                            
-      dec_3: 
-                                                                       begin
-                                                                                  if (A==1 && B==1)
-                                                                                       begin
-                                                                                             next_state = dec_2;
-                                                                                        end
-                                                                                  else if (A==1 && B==0)
-                                                                                           begin
-                                                                                             next_state = dec_3;
-                                                                                           end        
-                                                                                  else if (A==0 && B==0)
-                                                                                            begin
-                                                                                             next_state = wait_state;
-                                                                                             current_P = current_P - 1;
-                                                                                       //    neg = 1;
-                                                                                            end              
-                                                                                    else
-                                                                                              next_state =  error;                          
-                                                                              end      
-                                                                              
-                                                                              
-            error: 
-              begin
-              next_state =  wait_state;  
               
-              end                                                                  
                                                                               
    endcase                                                                                                         
       
-      end                                                                                
+                                                                                     
   
   end      
- /* 
-  always @ (*) begin
+ /*
+  always @ (posedge  pos or posedge neg or posedge reset ) begin
     if (reset)
-        begin
+       begin
         current_P <= 0;
-        end 
-   
-    else if (current_P == lim1) begin
-    current_P <= Min;
-    end
+    end  
+	
+  else if (current_P == lim1) begin
+  current_P <= Min;
+  end
 
-    else if (current_P == lim2) begin
-    current_P <= Max;
-    end
-    else if (pos == 1) begin
-    current_P <= current_P+1;
-  
-    end
-    else if (neg == 1 )begin
-    current_P <= current_P-1;
-
-    end
-    else begin
-    current_P <= current_P;
-    end
-    
-    
+  else if (current_P == lim2) begin
+  current_P <= Max;
+  end
+	
+	
+    else if (neg)
+	  begin
+    current_P <= current_P - 1'b1;
+   end
  
-  end          
-  */
+	else if (pos)
+		begin
+		current_P <= current_P+1;
+		end
+
+	else   
+            begin 
+          current_P <= current_P;
+
+            end	
+		
+		
+ end
+
+
+	
+
+
+   */ 
+
+ 
+        
+ 
   
-  assign P = current_P;
-
-endmodule
-
+    assign P = current_P;
+ //    assign State_test = current_state;
+//	assign Next_state_test = next_state;
+//	assign Next_p = next_P;
+	
+	endmodule

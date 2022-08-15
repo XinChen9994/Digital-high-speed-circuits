@@ -1,28 +1,7 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2022/07/26 20:26:39
-// Design Name: 
-// Module Name: EE_TOP
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 
 module EE_TOP(
 input reset,
-input clk,
 input [3:0]PR,
 input[2:0] R,
 input A,
@@ -38,7 +17,7 @@ output     Drive_Led,
 output     Load_Led
     );
 
-reg CLK;
+//reg CLK;
 wire [23:0] Rate;
 wire [9:0] PPR;
 wire signed [9:0] P_AB;  // Original Position of encoder.
@@ -48,36 +27,65 @@ wire [9:0] Position_CD;
 wire [9:0] Position_Pen;
 
 wire [1:0] State;
-//assign PPR = 600;
-//assign Rate = 4000;
 
-//assign P_AB = 256;
-//assign P_CD =-256;
+wire clk;
+wire B_Db;
+wire A_Db;
+ 
+  OSCH #(
+    .NOM_FREQ("10.23")
+  ) internal_oscillator_inst (
+    .STDBY(1'b0), 
+    .OSC(clk)
+  );     
+   
 
-//encoder 1 get the postion P_AB.
+/*
+// Internal Oscillator
+// defparam OSCH_inst.NOM_FREQ = "2.08";// This is the default frequency
+ defparam OSCH_inst.NOM_FREQ = "10.23";
+OSCH OSCH_inst( .STDBY(1'b0), // 0=Enabled, 1=Disabled
+// also Disabled with Bandgap=OFF
+ .OSC(clk),
+ .SEDSTDBY()); // this signal is not required if not
+// using SED
+*/
+
+
+debounce dba(
+	.clk(clk),
+    .Signal_in(A),
+    .Signal_out(A_Db)
+
+    );
+
+
+debounce dbb(
+	.clk(clk),
+    .Signal_in(B),
+    .Signal_out(B_Db)
+
+    );
+
+
+
     encoder ecd(.reset(reset),
-     .CLK(clk),.A(A),.B(B),.PPR(PPR),.P(P_AB));
+     .clk(clk),.A(A_Db),.B(B_Db),.PPR(PPR),.P(P_AB));
      
-     //encoder 2 get the postion P_CD.
- //    encoder ece(.reset(reset),
- //    .CLK(clk),.A(C),.B(D),.PPR(PPR),.P(P_CD));
+
      
      Clock cok(.reset(reset),
       .clk(clk),.Rate(Rate),.CLK_PWM(CLK_PWM));
      
      Converters cvt(.PPR(PPR),
      .P(P_AB),.Position(Position_AB));
-     
-  //   Converters cvy(.PPR(PPR),
-//     .P(P_CD),.Position(Position_CD));
+
     
      PWM_Generator pga(
      .reset(reset),
      .CLK(CLK_PWM),
- //  .CLK(clk),
-   //  .PPR(PPR),
+
      .Position(Position_AB),
- //    .f(rate),
      .pwm(PWM_AB)
          );
    
@@ -96,12 +104,13 @@ wire [1:0] State;
           .Position( Position_Pen)
          
              );  
-             
+            
          
     Pendulum pdm(
                .clk(CLK_PWM),
                .reset(reset),
-               .Position( Position_Pen),
+              .Position( Position_Pen),
+			// .Position( Position_AB),
                .State(State),
                .Drive(Drive),
                .Load(Load),
@@ -138,8 +147,7 @@ wire [1:0] State;
  
       
       
-      
-      
+ 
       
     
 endmodule

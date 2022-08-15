@@ -1,23 +1,4 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2022/07/06 13:34:15
-// Design Name: 
-// Module Name: PPR_swtich
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
+
 
 
 module PPR_switch(
@@ -32,7 +13,7 @@ output [9:0] PPR_1
     
     always@(*)begin
         case(PR)
-        4'b0000: PPR =10'd63;
+        4'b0000: PPR =10'd63; 
         4'b0001: PPR =10'd99;
         4'b0010: PPR =10'd127;
         4'b0011: PPR =10'd199;

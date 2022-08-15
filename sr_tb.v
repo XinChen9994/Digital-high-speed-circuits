@@ -79,7 +79,7 @@ module sr_tb(
              SDA_Enable = 0; // STOP
              SDA = 1;
              
-             #5125 // 2nd test 10101010  rate010 ppr 1010
+             #5125 // 2nd test 01010101  rate010 ppr 1010
                 SDA = 0;
                 #125
                // #375

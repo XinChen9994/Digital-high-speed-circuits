@@ -1,23 +1,4 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2022/07/24 20:00:48
-// Design Name: 
-// Module Name: Converters
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
+
 
 
 module Converters(input [9:0] PPR,
@@ -30,7 +11,7 @@ wire [31:0] PPR_C ;
 wire [31:0] PPR_PWM;
 wire [31:0] Position_32;
 
-assign PP = P + ((PPR+1)/2);
+assign PP = P + ((PPR+1)/10'd2);
 //assign PPR_C = PPR <<< 10'd22;
 assign PPR_PWM =  32'd4290772992/ PPR; // 1023 <<< 22bits  divede the PPR
 assign Position_32 = PP * PPR_PWM;  // 
